@@ -3,16 +3,19 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-const apiKey = "b3e15c4737290fe97fed1c359bd47d12"
+// const apiKey = "b3e15c4737290fe97fed1c359bd47d12"
+
+const apiKey = "f34f18a4c3ca9bd80f6cb96488136858"
 
 type WeatherResponse struct {
-	Name string `json: name`
+	Name string `json: "name"`
 	Main struct {
 		Temp float64 `json:"temp"`
 	} `json:"main"`
@@ -48,8 +51,17 @@ func weatherReporter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := fmt.Sprintf("The current temperature in %s with zip code %s is %v°C", weather.Name, zipcode, weather.Main.Temp)
-	w.Write([]byte(resp))
+	tmpl, err := template.ParseFiles("weather.html")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, weather)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func main() {
