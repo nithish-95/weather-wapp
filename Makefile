@@ -6,4 +6,5 @@ run:
 	bin/weatherapp
 clean:
 	go mod tidy
-	rm bin/*
+	rm bin/* || true
+
