@@ -11,12 +11,14 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-// const apiKey = "b3e15c4737290fe97fed1c359bd47d12"
-
 const apiKey = "f34f18a4c3ca9bd80f6cb96488136858"
 
 type WeatherResponse struct {
-	Name string `json:"name"`
+	Name    string `json:"name"`
+	Weather []struct {
+		Main        string `json:"main"`
+		Description string `json:"description"`
+	} `json:"weather"`
 	Main struct {
 		Temp float64 `json:"temp"`
 	} `json:"main"`
@@ -24,6 +26,7 @@ type WeatherResponse struct {
 
 func getWeather(zipCode string) (*WeatherResponse, error) {
 	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?zip=%s&appid=%s&units=metric", zipCode, apiKey)
+	// url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric", url.QueryEscape(zipCode), apiKey)
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -38,9 +41,26 @@ func getWeather(zipCode string) (*WeatherResponse, error) {
 	return &weatherResponse, nil
 }
 
+func getWeatherByCity(cityName string) (*WeatherResponse, error) {
+	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric", url.QueryEscape(cityName), apiKey)
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	var weatherResponse WeatherResponse
+	if err := json.NewDecoder(resp.Body).Decode(&weatherResponse); err != nil {
+		return nil, err
+	}
+
+	return &weatherResponse, nil
+}
+
 // :3000/zipcode/{Zipcode}
 func ZipcodeReport(w http.ResponseWriter, r *http.Request) {
 	zipcode := chi.URLParam(r, "zipcode")
+	// zipcode := r.URL.Query().Get("zipcode")
 
 	if zipcode == "" {
 		http.Error(w, "Zipcode not found", http.StatusNotFound)
@@ -66,22 +86,6 @@ func ZipcodeReport(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getCityName(cityName string) (*WeatherResponse, error) {
-	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric", url.QueryEscape(cityName), apiKey)
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	var weatherResponse WeatherResponse
-	if err := json.NewDecoder(resp.Body).Decode(&weatherResponse); err != nil {
-		return nil, err
-	}
-
-	return &weatherResponse, nil
-}
-
 // http://localhost:3000/weather?name={CityName}
 func CityNameReport(w http.ResponseWriter, r *http.Request) {
 	cityName := r.URL.Query().Get("name")
@@ -91,7 +95,7 @@ func CityNameReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	weather, err := getCityName(cityName)
+	weather, err := getWeatherByCity(cityName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -115,6 +119,7 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Get("/zipcode/{zipcode}", ZipcodeReport)
+	// r.Get("/zipcode", ZipcodeReport)
 	r.Get("/weather", CityNameReport)
 
 	err := http.ListenAndServe(":3000", r)

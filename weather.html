@@ -37,6 +37,8 @@
         <h3>The current temperature in</h3>
         <h1>{{.Name}}</h1>
         <h1>{{.Main.Temp}}°C</h1>
+        <h1>Climate : {{(index .Weather 0).Main}} </h1>
+        <h1> Description: {{(index .Weather 0).Description}}</h1>
     </div>
 </body>
 </html>
