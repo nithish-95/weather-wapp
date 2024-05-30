@@ -38,7 +38,7 @@ func getWeather(zipCode string) (*WeatherResponse, error) {
 	return &weatherResponse, nil
 }
 
-// :3000/zipcode
+// :3000/zipcode/{Zipcode}
 func ZipcodeReport(w http.ResponseWriter, r *http.Request) {
 	zipcode := chi.URLParam(r, "zipcode")
 
@@ -82,6 +82,7 @@ func getCityName(cityName string) (*WeatherResponse, error) {
 	return &weatherResponse, nil
 }
 
+// http://localhost:3000/weather?name={CityName}
 func CityNameReport(w http.ResponseWriter, r *http.Request) {
 	cityName := r.URL.Query().Get("name")
 
