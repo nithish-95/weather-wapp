@@ -29,6 +29,15 @@
             color: #ffffff;
             text-align: center;
         }
+        .icon {
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+            margin: 10px 0;
+        }
+        img {
+            max-width: 150px; 
+        }        
     </style>
 </head>
 <body>
@@ -38,6 +47,9 @@
         <h1>{{.Name}}</h1>
         <h1>{{.Main.Temp}}°C</h1>
         <h1>Climate : {{(index .Weather 0).Main}} </h1>
+        <div class="icon">
+            <img src="http://openweathermap.org/img/wn/{{(index .Weather 0).Icon}}@2x.png" alt="Weather Icon" >
+        </div>
         <h1> Description: {{(index .Weather 0).Description}}</h1>
     </div>
 </body>
