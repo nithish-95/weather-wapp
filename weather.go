@@ -13,11 +13,13 @@ import (
 
 const apiKey = "f34f18a4c3ca9bd80f6cb96488136858"
 
+// http://api.openweathermap.org/data/2.5/weather?q=Dearborn&appid=f34f18a4c3ca9bd80f6cb96488136858&units=metric
 type WeatherResponse struct {
 	Name    string `json:"name"`
 	Weather []struct {
 		Main        string `json:"main"`
 		Description string `json:"description"`
+		Icon        string `json:"icon"`
 	} `json:"weather"`
 	Main struct {
 		Temp float64 `json:"temp"`
@@ -59,8 +61,8 @@ func getWeatherByCity(cityName string) (*WeatherResponse, error) {
 
 // :3000/zipcode/{Zipcode}
 func ZipcodeReport(w http.ResponseWriter, r *http.Request) {
-	zipcode := chi.URLParam(r, "zipcode")
-	// zipcode := r.URL.Query().Get("zipcode")
+	// zipcode := chi.URLParam(r, "zipcode")
+	zipcode := r.URL.Query().Get("zipcode")
 
 	if zipcode == "" {
 		http.Error(w, "Zipcode not found", http.StatusNotFound)
@@ -114,17 +116,24 @@ func CityNameReport(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func mainPage(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "index.html")
+}
+
 func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	r.Get("/zipcode/{zipcode}", ZipcodeReport)
-	// r.Get("/zipcode", ZipcodeReport)
+
+	// Serve the form
+	r.Get("/", mainPage)
+
+	// r.Get("/zipcode/{zipcode}", ZipcodeReport)
+	r.Get("/zipcode", ZipcodeReport)
 	r.Get("/weather", CityNameReport)
 
 	err := http.ListenAndServe(":3000", r)
 	if err != nil {
 		fmt.Print(err)
 	}
-
 }
