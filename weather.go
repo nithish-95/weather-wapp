@@ -114,6 +114,7 @@ func CityNameReport(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 }
 
 func mainPage(w http.ResponseWriter, r *http.Request) {
