@@ -14,6 +14,11 @@
 
 -- make
 
+### Your application will be available 
+--  http://localhost:3000
+
+## Using Docker 
+
 ### Building and running your application
 
 -- docker build --progress plain --no-cache -t weatherapp1 .
