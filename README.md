@@ -1,3 +1,5 @@
+WEATHER - APP
+
 ### Running this application in the your Local Meachine
 
 ### 1.1 Clone the Repo
@@ -8,7 +10,7 @@
 
 -- go get -u github.com/go-chi/chi/v5
 
-### 1.3 Run the Application using Make (it will perfrom clean --> build --> run )
+### 1.3 Run the Application using Make (it will perfrom : clean --> build --> run )
 
 -- make
 
