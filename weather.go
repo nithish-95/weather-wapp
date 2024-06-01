@@ -26,7 +26,31 @@ type WeatherResponse struct {
 	} `json:"main"`
 }
 
-func getWeather(zipCode string) (*WeatherResponse, error) {
+type IpResponse struct {
+	City string  `json:"city"`
+	Lat  float64 `json:"lat"`
+	Lon  float64 `json:"lon"`
+	Zip  string  `json:"zip"`
+}
+
+// http://ip-api.com/json/
+func getIp() (*IpResponse, error) {
+	url := "http://ip-api.com/json/"
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var ipResponse IpResponse
+	if err := json.NewDecoder(resp.Body).Decode(&ipResponse); err != nil {
+		return nil, err
+	}
+
+	return &ipResponse, nil
+}
+
+func getWeatherByZip(zipCode string) (*WeatherResponse, error) {
 	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?zip=%s&appid=%s&units=metric", zipCode, apiKey)
 	// url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric", url.QueryEscape(zipCode), apiKey)
 	resp, err := http.Get(url)
@@ -61,7 +85,6 @@ func getWeatherByCity(cityName string) (*WeatherResponse, error) {
 
 // :3000/zipcode/{Zipcode}
 func ZipcodeReport(w http.ResponseWriter, r *http.Request) {
-	// zipcode := chi.URLParam(r, "zipcode")
 	zipcode := r.URL.Query().Get("zipcode")
 
 	if zipcode == "" {
@@ -69,7 +92,7 @@ func ZipcodeReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	weather, err := getWeather(zipcode)
+	weather, err := getWeatherByZip(zipcode)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -117,8 +140,31 @@ func CityNameReport(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func mainPage(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "index.html")
+func IpReporter(w http.ResponseWriter, r *http.Request) {
+	ip, err := getIp()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	weather, err := getWeatherByCity(ip.City)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("weather.html")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, weather)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 }
 
 func main() {
@@ -127,9 +173,7 @@ func main() {
 	r.Use(middleware.Logger)
 
 	// Serve the form
-	r.Get("/", mainPage)
-
-	// r.Get("/zipcode/{zipcode}", ZipcodeReport)
+	r.Get("/", IpReporter)
 	r.Get("/zipcode", ZipcodeReport)
 	r.Get("/weather", CityNameReport)
 
