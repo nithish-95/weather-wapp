@@ -17,6 +17,7 @@
             border-radius: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
         h1 {
             color: #ffffff;
             text-align: center;
@@ -78,9 +79,13 @@
         <div class="icon">
             <img src="http://openweathermap.org/img/wn/{{(index .Weather 0).Icon}}@2x.png" alt="Weather Icon" >
         </div>
-        <h1>Climate : {{(index .Weather 0).Main}} </h1>
-        <h1> Description: {{(index .Weather 0).Description}}</h1>
-    <div>
+
+        <!-- <h1>min : {{.Main.TempMin}}°C</h1>
+        <h1>max : {{.Main.TempMax}}°C</h1> -->
+        <h1>Climate : {{(index .Weather 0).Main}} ( {{(index .Weather 0).Description}} ) </h1>
+
+        <!-- <h1>Humidity : {{.Main.Humidity}}</h1> -->
+
         <form action="/zipcode" method="get">
             <input type="text" name="zipcode" placeholder="Enter ZIP Code" required>
             <input type="submit" value="Get Weather by ZIP Code">
@@ -90,6 +95,6 @@
             <input type="submit" value="Get Weather by City Name">
         </form>
     </div>
-    </div>
+    
 </body>
 </html>
