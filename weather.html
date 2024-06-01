@@ -5,60 +5,48 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #c0edf7;
+            background-color: #ffffff;
             margin: 0;
             padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         .container {
-            max-width: 600px;
-            margin: 20px auto;
+            max-width: 400px;
+            width: 90%;
             padding: 20px;
-            background-color: #6aadf6cf;
+            background-color: #6c8fa151;
             border-radius: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            color: #ffffff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             text-align: center;
-        }
-        .name{
             color: #ffffff;
-            text-align: center;
-            size: 20px;
         }
-        h2 {
-            color: #ffffff;
-            text-align: center;
-        }
-        h3 {
-            color: #ffffff;
-            text-align: center;
-        }
-        .icon {
-            display: flex;
-            justify-content: center; 
-            align-items: center; 
+        h1, h2, h3 {
             margin: 10px 0;
         }
+        .icon {
+            margin: 20px 0;
+        }
         img {
-            max-width: 150px; 
-        } 
+            max-width: 150px;
+        }
         form {
+            margin: 20px 0;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            justify-content: center;
         }
         input[type="text"] {
             padding: 10px;
-            margin: 10px;
+            margin-right: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            flex: 1;
         }
         input[type="submit"] {
             padding: 10px 20px;
-            margin: 10px;
-            background-color: #007BFF;
+            background-color: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
@@ -67,25 +55,21 @@
         input[type="submit"]:hover {
             background-color: #0056b3;
         }
-               
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Weather Report</h1>
         <h3>The current temperature in</h3>
-        <h1>{{.Name}}</h1>
+        <h2>{{.Name}}</h2>
         <h1>{{.Main.Temp}}°C</h1>
         <div class="icon">
-            <img src="http://openweathermap.org/img/wn/{{(index .Weather 0).Icon}}@2x.png" alt="Weather Icon" >
+            <img src="http://openweathermap.org/img/wn/{{(index .Weather 0).Icon}}@2x.png" alt="Weather Icon">
         </div>
-
-        <!-- <h1>min : {{.Main.TempMin}}°C</h1>
-        <h1>max : {{.Main.TempMax}}°C</h1> -->
-        <h1>Climate : {{(index .Weather 0).Main}} ( {{(index .Weather 0).Description}} ) </h1>
-
-        <!-- <h1>Humidity : {{.Main.Humidity}}</h1> -->
-
+        <h2>Climate: {{(index .Weather 0).Main}} ({{(index .Weather 0).Description}})</h2>
+        <h3>Wind: {{.Wind.Speed}} m/s</h3>
+        <h3>Humidity: {{.Main.Humidity}}%</h3>
+        
         <form action="/zipcode" method="get">
             <input type="text" name="zipcode" placeholder="Enter ZIP Code" required>
             <input type="submit" value="Get Weather by ZIP Code">
@@ -95,6 +79,5 @@
             <input type="submit" value="Get Weather by City Name">
         </form>
     </div>
-    
 </body>
 </html>
