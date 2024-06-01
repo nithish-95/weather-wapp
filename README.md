@@ -24,7 +24,7 @@
 -- docker build --progress plain --no-cache -t weatherapp1 .
 
 
-### Deploying your application to the cloud
+### Expose the application to the given port
 
 docker run -p 3000:3000 weatherapp1 
 
