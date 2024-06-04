@@ -4,7 +4,7 @@
     <title>Weather Report</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             background-color: #ffffff;
             margin: 0;
             padding: 0;
@@ -23,6 +23,7 @@
             text-align: center;
             color: #ffffff;
         }
+    
         h1, h2, h3 {
             margin: 10px 0;
         }
@@ -61,13 +62,13 @@
     <div class="container">
         <h1>Weather Report</h1>
         <h3>The current temperature in</h3>
-        <h2>{{.Name}}</h2>
+        <h1>{{.Name}}</h1>
         <h1>{{.Main.Temp}}°C</h1>
         <div class="icon">
             <img src="http://openweathermap.org/img/wn/{{(index .Weather 0).Icon}}@2x.png" alt="Weather Icon">
         </div>
         <h2>Climate: {{(index .Weather 0).Main}} ({{(index .Weather 0).Description}})</h2>
-        <h3>Wind: {{.Wind.Speed}} m/s</h3>
+        <h3>Wind: {{.Wind.Speed}} m/s, {{.Wind.Deg}}°</h3>
         <h3>Humidity: {{.Main.Humidity}}%</h3>
         
         <form action="/zipcode" method="get">
@@ -80,4 +81,4 @@
         </form>
     </div>
 </body>
-</html>
+</html> 
