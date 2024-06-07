@@ -24,4 +24,4 @@ USER appuser
 
 ENTRYPOINT ["./weatherapp"]
 
-EXPOSE 8000
+EXPOSE 3000
