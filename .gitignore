@@ -22,7 +22,7 @@ go.work
 go.work.sum
 
 #pem files
-.pem
+*.pem
 
 # Bin
 bin/
