@@ -134,7 +134,7 @@ func WeatherReport(w http.ResponseWriter, r *http.Request) {
 	var weather *WeatherResponse
 	var err error
 
-	if _, err := strconv.Atoi(query); err == nil {
+	if _, convErr := strconv.Atoi(query); convErr == nil {
 		weather, err = getWeatherByZip(query)
 	} else {
 		weather, err = getWeatherByCity(query)
