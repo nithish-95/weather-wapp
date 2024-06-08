@@ -19,57 +19,60 @@
             padding: 20px;
             background-color: #6c8fa151;
             border-radius: 20px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 10px 20px 30px rgba(0, 0, 0, 0.2);
             text-align: center;
             color: #ffffff;
         }
     
         h1, h2, h3 {
             margin: 10px 0;
+            color: #507aa8;
         }
         .icon {
-            margin: 20px 0;
+            margin: 15px 0;
         }
         img {
-            max-width: 150px;
+            max-width: 280px;
         }
         form {
             margin: 20px 0;
-            display: flex;
+            display: inline-block;
             justify-content: center;
         }
         input[type="text"] {
             padding: 10px;
             margin-right: 10px;
             border: 1px solid #ccc;
-            border-radius: 5px;
+            border-radius: 20px;
             flex: 1;
         }
         input[type="submit"] {
             padding: 10px 20px;
-            background-color: #007bff;
+            background-color: #507aa8;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 20px;
             cursor: pointer;
         }
         input[type="submit"]:hover {
-            background-color: #0056b3;
+            background-color: #7ea6d2;
         }
+        
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Weather Report</h1>
-        <h3>The current temperature in</h3>
+        <!-- <h1>Weather Report</h1> -->
+        <h2>Today in</h2>
         <h1>{{.Name}}</h1>
         <h1>{{.Main.Temp}}°C</h1>
         <div class="icon">
             <img src="http://openweathermap.org/img/wn/{{(index .Weather 0).Icon}}@2x.png" alt="Weather Icon">
         </div>
-        <h2>Climate: {{(index .Weather 0).Main}} ({{(index .Weather 0).Description}})</h2>
+        <h1>{{(index .Weather 0).Description}}</h1>
+        <!-- <h2>Climate: {{(index .Weather 0).Main}} ({{(index .Weather 0).Description}})</h2> -->
         <h3>Wind: {{.Wind.Speed}} m/s, {{.Wind.Deg}}°</h3>
-        <h3>Humidity: {{.Main.Humidity}}%</h3>
+        <h3>{{.Main.Humidity}}% Humidity</h3>
         
         <form action="/zipcode" method="get">
             <input type="text" name="zipcode" placeholder="Enter ZIP Code" required>
