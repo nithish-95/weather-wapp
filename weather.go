@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"log/slog"
 	"net/http"
 	"net/url"
 
@@ -104,6 +105,9 @@ func getWeatherByCity(cityName string) (*WeatherResponse, error) {
 func ZipcodeReport(w http.ResponseWriter, r *http.Request) {
 	zipcode := r.URL.Query().Get("zipcode")
 
+	for k, v := range r.Header {
+		slog.Info("Header", "key", k, "value", v)
+	}
 	if zipcode == "" {
 		http.Error(w, "Zipcode not found", http.StatusNotFound)
 		return
@@ -115,22 +119,16 @@ func ZipcodeReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl, err := template.ParseFiles("weather.html")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-
-	err = tmpl.Execute(w, weather)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
+	renderTemplate(w, weather)
 }
 
 // http://localhost:3000/weather?name={CityName}
 func CityNameReport(w http.ResponseWriter, r *http.Request) {
 	cityName := r.URL.Query().Get("name")
+
+	for k, v := range r.Header {
+		slog.Info("Header", "key", k, "value", v)
+	}
 
 	if cityName == "" {
 		http.Error(w, "City name not found", http.StatusNotFound)
@@ -143,21 +141,14 @@ func CityNameReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl, err := template.ParseFiles("weather.html")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	err = tmpl.Execute(w, weather)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	renderTemplate(w, weather)
 
 }
 
 func IpReporter(w http.ResponseWriter, r *http.Request) {
+	for k, v := range r.Header {
+		slog.Info("Header", "key", k, "value", v)
+	}
 	ip, err := getIp()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -170,18 +161,19 @@ func IpReporter(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	renderTemplate(w, weather)
+}
+
+func renderTemplate(w http.ResponseWriter, data *WeatherResponse) {
 	tmpl, err := template.ParseFiles("weather.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = tmpl.Execute(w, weather)
-	if err != nil {
+	if err := tmpl.Execute(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
-
 }
 
 func main() {
@@ -191,6 +183,7 @@ func main() {
 
 	// Serve the form
 	r.Get("/", IpReporter)
+	// "/health" -> "OK"
 	r.Get("/zipcode", ZipcodeReport)
 	r.Get("/weather", CityNameReport)
 
