@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -101,50 +102,6 @@ func getWeatherByCity(cityName string) (*WeatherResponse, error) {
 	return &weatherResponse, nil
 }
 
-// :3000/zipcode/{Zipcode}
-func ZipcodeReport(w http.ResponseWriter, r *http.Request) {
-	zipcode := r.URL.Query().Get("zipcode")
-
-	for k, v := range r.Header {
-		slog.Info("Header", "key", k, "value", v)
-	}
-	if zipcode == "" {
-		http.Error(w, "Zipcode not found", http.StatusNotFound)
-		return
-	}
-
-	weather, err := getWeatherByZip(zipcode)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-
-	renderTemplate(w, weather)
-}
-
-// http://localhost:3000/weather?name={CityName}
-func CityNameReport(w http.ResponseWriter, r *http.Request) {
-	cityName := r.URL.Query().Get("name")
-
-	for k, v := range r.Header {
-		slog.Info("Header", "key", k, "value", v)
-	}
-
-	if cityName == "" {
-		http.Error(w, "City name not found", http.StatusNotFound)
-		return
-	}
-
-	weather, err := getWeatherByCity(cityName)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	renderTemplate(w, weather)
-
-}
-
 func IpReporter(w http.ResponseWriter, r *http.Request) {
 	for k, v := range r.Header {
 		slog.Info("Header", "key", k, "value", v)
@@ -156,6 +113,33 @@ func IpReporter(w http.ResponseWriter, r *http.Request) {
 	}
 
 	weather, err := getWeatherByCity(ip.City)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	renderTemplate(w, weather)
+}
+func WeatherReport(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("query")
+
+	for k, v := range r.Header {
+		slog.Info("Header", "key", k, "value", v)
+	}
+	if query == "" {
+		http.Error(w, "Query not found", http.StatusNotFound)
+		return
+	}
+
+	var weather *WeatherResponse
+	var err error
+
+	if _, err := strconv.Atoi(query); err == nil {
+		weather, err = getWeatherByZip(query)
+	} else {
+		weather, err = getWeatherByCity(query)
+	}
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -184,9 +168,7 @@ func main() {
 	// Serve the form
 	r.Get("/", IpReporter)
 	// "/health" -> "OK"
-	r.Get("/zipcode", ZipcodeReport)
-	r.Get("/weather", CityNameReport)
-
+	r.Get("/weather", WeatherReport)
 	err := http.ListenAndServe(":3000", r)
 	if err != nil {
 		fmt.Print(err)

@@ -36,7 +36,7 @@
         }
         form {
             margin: 20px 0;
-            display: inline-block;
+            display:grid;
             justify-content: center;
         }
         input[type="text"] {
@@ -73,15 +73,12 @@
         <!-- <h2>Climate: {{(index .Weather 0).Main}} ({{(index .Weather 0).Description}})</h2> -->
         <h3>Wind: {{.Wind.Speed}} m/s, {{.Wind.Deg}}°</h3>
         <h3>{{.Main.Humidity}}% Humidity</h3>
-        
-        <form action="/zipcode" method="get">
-            <input type="text" name="zipcode" placeholder="Enter ZIP Code" required>
-            <input type="submit" value="Get Weather by ZIP Code">
-        </form>
+
         <form action="/weather" method="get">
-            <input type="text" name="name" placeholder="Enter City Name" required>
-            <input type="submit" value="Get Weather by City Name">
+            <input type="text" name="query" placeholder="Enter ZIPCode or CityName" required>
+            <input type="submit" value="Get Weather">
         </form>
+        
     </div>
 </body>
 </html> 
