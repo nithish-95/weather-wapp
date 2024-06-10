@@ -53,8 +53,8 @@ type IpResponse struct {
 }
 
 // http://ip-api.com/json/
-func getIp() (*IpResponse, error) {
-	url := "http://ip-api.com/json/"
+func getIp(ip string) (*IpResponse, error) {
+	url := fmt.Sprintf("http://ip-api.com/json/%s", ip)
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,6 @@ func getIp() (*IpResponse, error) {
 	if err := json.NewDecoder(resp.Body).Decode(&ipResponse); err != nil {
 		return nil, err
 	}
-
 	return &ipResponse, nil
 }
 
@@ -92,8 +91,8 @@ func getWeatherByCity(cityName string) (*WeatherResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	defer resp.Body.Close()
+
 	var weatherResponse WeatherResponse
 	if err := json.NewDecoder(resp.Body).Decode(&weatherResponse); err != nil {
 		return nil, err
@@ -103,29 +102,32 @@ func getWeatherByCity(cityName string) (*WeatherResponse, error) {
 }
 
 func IpReporter(w http.ResponseWriter, r *http.Request) {
-	for k, v := range r.Header {
-		slog.Info("Header", "key", k, "value", v)
-	}
-	ip, err := getIp()
+	userIP := r.Header.Get("X-Forwarded-For")
+
+	ipInfo, err := getIp(userIP)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "Could not get IP info: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	weather, err := getWeatherByCity(ip.City)
+	weather, err := getWeatherByCity(ipInfo.City)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "Could not get weather info: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	renderTemplate(w, weather)
 }
+
 func WeatherReport(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.RemoteAddr, r.RequestURI)
+
 	query := r.URL.Query().Get("query")
 
 	for k, v := range r.Header {
 		slog.Info("Header", "key", k, "value", v)
 	}
+	fmt.Println(r.Header.Get("Accept-Encoding"))
 	if query == "" {
 		http.Error(w, "Query not found", http.StatusNotFound)
 		return
@@ -167,8 +169,8 @@ func main() {
 
 	// Serve the form
 	r.Get("/", IpReporter)
-	// "/health" -> "OK"
 	r.Get("/weather", WeatherReport)
+
 	err := http.ListenAndServe(":3000", r)
 	if err != nil {
 		fmt.Print(err)
