@@ -52,7 +52,7 @@ type IpResponse struct {
 	Zip  string  `json:"zip"`
 }
 
-// http://ip-api.com/json/
+// http://ip-api.com/json/{userIp}
 func getIp(ip string) (*IpResponse, error) {
 	url := fmt.Sprintf("http://ip-api.com/json/%s", ip)
 	resp, err := http.Get(url)
