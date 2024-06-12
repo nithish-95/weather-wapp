@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"log/slog"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -15,7 +15,6 @@ import (
 
 const apiKey = "f34f18a4c3ca9bd80f6cb96488136858"
 
-// http://api.openweathermap.org/data/2.5/weather?q=Dearborn&appid=f34f18a4c3ca9bd80f6cb96488136858&units=metric
 type WeatherResponse struct {
 	Name    string `json:"name"`
 	Weather []struct {
@@ -68,6 +67,24 @@ func getIp(ip string) (*IpResponse, error) {
 	return &ipResponse, nil
 }
 
+func IpReporter(w http.ResponseWriter, r *http.Request) {
+	userIP := r.Header.Get("X-Forwarded-For")
+
+	ipInfo, err := getIp(userIP)
+	if err != nil {
+		http.Error(w, "Could not get IP info: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	weather, err := getWeatherByCity(ipInfo.City)
+	if err != nil {
+		http.Error(w, "Could not get weather info: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	renderTemplate(w, weather)
+}
+
 func getWeatherByZip(zipCode string) (*WeatherResponse, error) {
 	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?zip=%s&appid=%s&units=metric", zipCode, apiKey)
 	// url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric", url.QueryEscape(zipCode), apiKey)
@@ -101,33 +118,9 @@ func getWeatherByCity(cityName string) (*WeatherResponse, error) {
 	return &weatherResponse, nil
 }
 
-func IpReporter(w http.ResponseWriter, r *http.Request) {
-	userIP := r.Header.Get("X-Forwarded-For")
-
-	ipInfo, err := getIp(userIP)
-	if err != nil {
-		http.Error(w, "Could not get IP info: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	weather, err := getWeatherByCity(ipInfo.City)
-	if err != nil {
-		http.Error(w, "Could not get weather info: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	renderTemplate(w, weather)
-}
-
 func WeatherReport(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.RemoteAddr, r.RequestURI)
-
 	query := r.URL.Query().Get("query")
 
-	for k, v := range r.Header {
-		slog.Info("Header", "key", k, "value", v)
-	}
-	fmt.Println(r.Header.Get("Accept-Encoding"))
 	if query == "" {
 		http.Error(w, "Query not found", http.StatusNotFound)
 		return
@@ -147,6 +140,41 @@ func WeatherReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	renderTemplate(w, weather)
+}
+
+// http://localhost:3000/weather/latlon?{lat}&{lon}
+func getWeatherByLatLon(lat, lon string) (*WeatherResponse, error) {
+
+	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s&units=metric", lat, lon, apiKey)
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var weatherResponse WeatherResponse
+	if err := json.NewDecoder(resp.Body).Decode(&weatherResponse); err != nil {
+		return nil, err
+	}
+
+	return &weatherResponse, nil
+}
+
+func latlonReporter(w http.ResponseWriter, r *http.Request) {
+	lat := r.URL.Query().Get("lat")
+	lon := r.URL.Query().Get("lon")
+
+	if lat == "" || lon == "" {
+		http.Error(w, "Latitude and Longitude not found", http.StatusBadRequest)
+		return
+	}
+	weather, err := getWeatherByLatLon(lat, lon)
+	if err != nil {
+		log.Printf("Could not get weather info: %v", err)
+		http.Error(w, "Could not get weather info: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 	renderTemplate(w, weather)
 }
 
@@ -170,6 +198,7 @@ func main() {
 	// Serve the form
 	r.Get("/", IpReporter)
 	r.Get("/weather", WeatherReport)
+	r.Get("/weather/latlon", latlonReporter)
 
 	err := http.ListenAndServe(":3000", r)
 	if err != nil {

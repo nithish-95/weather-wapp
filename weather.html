@@ -34,6 +34,7 @@
         img {
             max-width: 280px;
         }
+        
         form {
             margin: 20px 0;
             display:grid;
@@ -57,12 +58,23 @@
         input[type="submit"]:hover {
             background-color: #7ea6d2;
         }
-        
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    window.location.href = `/weather/latlon?lat=${lat}&lon=${lon}`;
+                });
+            }
+        });
+    </script>
 </head>
 <body>
+
     <div class="container">
-        <!-- <h1>Weather Report</h1> -->
+
         <h2>Today in</h2>
         <h1>{{.Name}}</h1>
         <h1>{{.Main.Temp}}°C</h1>
@@ -70,7 +82,7 @@
             <img src="http://openweathermap.org/img/wn/{{(index .Weather 0).Icon}}@2x.png" alt="Weather Icon">
         </div>
         <h1>{{(index .Weather 0).Description}}</h1>
-        <!-- <h2>Climate: {{(index .Weather 0).Main}} ({{(index .Weather 0).Description}})</h2> -->
+
         <h3>Wind: {{.Wind.Speed}} m/s, {{.Wind.Deg}}°</h3>
         <h3>{{.Main.Humidity}}% Humidity</h3>
 
