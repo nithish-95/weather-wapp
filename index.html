@@ -59,29 +59,32 @@
             background-color: #7ea6d2;
         }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        window.location.href = `/weather/latlon?lat=${lat}&lon=${lon}`;
+                    },
+                    function(error) {
+                        if (error.code === error.PERMISSION_DENIED) {
+                            window.location.href = '/weather?query=seattle'; 
+                        }
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by this browser.');
+                window.location.href = '/weather?query=seattle'; 
+            }
+        });
+    </script>
 </head>
 <body>
-
     <div class="container">
-
-        <h2>Today in</h2>
-        <h1>{{.Name}}</h1>
-        <h1>{{.Main.Temp}}°C</h1>
-        <div class="icon">
-            <img src="http://openweathermap.org/img/wn/{{(index .Weather 0).Icon}}@2x.png" alt="Weather Icon">
-        </div>
-        <h1>{{(index .Weather 0).Description}}</h1>
-
-        <h3>Wind: {{.Wind.Speed}} m/s, {{.Wind.Deg}}°</h3>
-        <h3>{{.Main.Humidity}}% Humidity</h3>
-
-        <form action="/weather" method="get">
-            <input type="text" name="query" placeholder="  ZipCode or CityName" required>
-            <input type="submit" value="Get Weather">
-        </form>
-        
+        <h1>Weather Report</h1>
+        <p>Fetching weather data...</p>
     </div>
 </body>
-</html> 
-
-
+</html>

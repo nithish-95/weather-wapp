@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -70,6 +71,15 @@ func getIp(ip string) (*IpResponse, error) {
 func IpReporter(w http.ResponseWriter, r *http.Request) {
 	userIP := r.Header.Get("X-Forwarded-For")
 
+	if userIP == "" {
+		ip, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err != nil {
+			http.Error(w, "Could not get user IP: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		userIP = ip
+	}
+
 	ipInfo, err := getIp(userIP)
 	if err != nil {
 		http.Error(w, "Could not get IP info: "+err.Error(), http.StatusInternalServerError)
@@ -81,13 +91,11 @@ func IpReporter(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not get weather info: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	renderTemplate(w, weather)
+	renderTemplate(w, weather, "index.html")
 }
 
 func getWeatherByZip(zipCode string) (*WeatherResponse, error) {
 	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?zip=%s&appid=%s&units=metric", zipCode, apiKey)
-	// url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric", url.QueryEscape(zipCode), apiKey)
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -140,12 +148,10 @@ func WeatherReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	renderTemplate(w, weather)
+	renderTemplate(w, weather, "weather.html")
 }
 
-// http://localhost:3000/weather/latlon?{lat}&{lon}
 func getWeatherByLatLon(lat, lon string) (*WeatherResponse, error) {
-
 	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s&units=metric", lat, lon, apiKey)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -175,11 +181,11 @@ func latlonReporter(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not get weather info: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	renderTemplate(w, weather)
+	renderTemplate(w, weather, "weather.html")
 }
 
-func renderTemplate(w http.ResponseWriter, data *WeatherResponse) {
-	tmpl, err := template.ParseFiles("weather.html")
+func renderTemplate(w http.ResponseWriter, data *WeatherResponse, file string) {
+	tmpl, err := template.ParseFiles(file)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -191,11 +197,9 @@ func renderTemplate(w http.ResponseWriter, data *WeatherResponse) {
 }
 
 func main() {
-
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
-	// Serve the form
 	r.Get("/", IpReporter)
 	r.Get("/weather", WeatherReport)
 	r.Get("/weather/latlon", latlonReporter)
