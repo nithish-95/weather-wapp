@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"log"
-	"net"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -71,15 +70,6 @@ func getIp(ip string) (*IpResponse, error) {
 func IpReporter(w http.ResponseWriter, r *http.Request) {
 	userIP := r.Header.Get("X-Forwarded-For")
 
-	if userIP == "" {
-		ip, _, err := net.SplitHostPort(r.RemoteAddr)
-		if err != nil {
-			http.Error(w, "Could not get user IP: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		userIP = ip
-	}
-
 	ipInfo, err := getIp(userIP)
 	if err != nil {
 		http.Error(w, "Could not get IP info: "+err.Error(), http.StatusInternalServerError)
@@ -91,7 +81,7 @@ func IpReporter(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not get weather info: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	renderTemplate(w, weather, "index.html")
+	renderTemplate(w, weather, "weather.html")
 }
 
 func getWeatherByZip(zipCode string) (*WeatherResponse, error) {
@@ -195,12 +185,15 @@ func renderTemplate(w http.ResponseWriter, data *WeatherResponse, file string) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
-
+func indexpage(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "index.html")
+}
 func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
-	r.Get("/", IpReporter)
+	r.Get("/", indexpage)
+	r.Get("/ip", IpReporter)
 	r.Get("/weather", WeatherReport)
 	r.Get("/weather/latlon", latlonReporter)
 
