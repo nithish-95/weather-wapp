@@ -8,6 +8,18 @@
 </head>
 <body class="bg-gray-200 items-center min-h-screen">
     <div class="text-center text-md text-blue-900 p-2"> <b>Note :</b> Zipcode is only valid within the United States Region. Please use City name for other locations</div>
+
+    <!-- search bar -->
+    <div class="flex flex-col items-center space-y-8">
+        <!-- Search bar -->
+        <form action="/weather" method="get" class="w-full max-w-lg">
+            <div class="flex items-center bg-white rounded-full shadow-md ">
+                <input type="text" name="query" placeholder="ZipCode or CityName" class="flex-grow p-2 rounded-l-full border border-r-0" required>
+                <input type="submit" value="Get Weather" class="bg-blue-900 text-white py-2 px-4 rounded-r-full cursor-pointer">
+            </div>
+        </form>
+
+
     <!-- weather and forecast container -->
     <div class="flex flex-col items-center space-y-8">
         <!-- weather container -->
@@ -45,7 +57,7 @@
                             </div>
                         </div>
                     </div>
-
+<!-- 
                     <form action="/weather" method="get">
                         <div>
                             <input type="text" name="query" placeholder="ZipCode or CityName" class="p-2 rounded-md border mb-2 w-full" required>
@@ -53,7 +65,7 @@
                         <div>
                             <input type="submit" value="Get Weather" class="w-full bg-blue-900 text-white py-2 rounded-md">
                         </div>
-                    </form>
+                    </form> -->
                 </div>
             </div>
         </div>
