@@ -6,13 +6,14 @@
     <title>Weather Report</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-200 grid items-center justify-self-auto min-h-screen">
+<body class="bg-gray-200 items-center min-h-screen">
+    <div class="text-center text-md text-blue-900 p-2"> <b>Note :</b> Zipcode is only valid within the United States Region. Please use City name for other locations</div>
     <!-- weather and forecast container -->
-    <div class="flex justify-center space-x-8">
+    <div class="flex flex-col items-center space-y-8">
         <!-- weather container -->
         <div class="flex flex-col items-center">
             <!-- weather card -->
-            <div class="max-w-xs w-80 p-4 bg-gray-50 rounded-2xl shadow-lg mt-6">
+            <div class="max-w-xm w-80 p-4 bg-gray-50 rounded-2xl shadow-lg mt-6">
                 <div class="text-center">
                     <p class="text-lg text-blue-900 font-bold">Today in</p>
                     <p class="text-4xl p-2 font-bold text-blue-900">{{.Weather.Name}}</p>
@@ -24,6 +25,27 @@
                     <p class="text-md text-blue-900 p-2">min: {{.Weather.Main.TempMin}}°C || max: {{.Weather.Main.TempMax}}°C</p>
                     <p class="text-md text-blue-900">Wind: {{.Weather.Wind.Speed}} m/s, {{.Weather.Wind.Deg}}°</p>
                     <p class="text-md p-2 text-blue-900 mb-4">{{.Weather.Main.Humidity}}% Humidity</p>
+                    
+                    <!-- Sunrise and Sunset Timeline -->
+                    <div class="timeline-container mt-4">
+                        <div class="flex justify-between items-center">
+                            <div class="text-center">
+                                <p class="text-md text-blue-900 font-bold">Sunrise</p>
+                                <p class="text-md text-blue-900">{{formatUnixTime .Weather.Sys.Sunrise}}</p>
+                            </div>
+                            <div class="flex-1 border-t-2 border-blue-900 mx-2"></div>
+                            <div class="text-center">
+                                <p class="text-md text-blue-900 font-bold">Now</p>
+                                <p class="text-md text-blue-900">{{formatUnixTime .CurrentTime}}</p>
+                            </div>
+                            <div class="flex-1 border-t-2 border-blue-900 mx-2"></div>
+                            <div class="text-center">
+                                <p class="text-md text-blue-900 font-bold">Sunset</p>
+                                <p class="text-md text-blue-900">{{formatUnixTime .Weather.Sys.Sunset}}</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <form action="/weather" method="get">
                         <div>
                             <input type="text" name="query" placeholder="ZipCode or CityName" class="p-2 rounded-md border mb-2 w-full" required>
@@ -39,16 +61,16 @@
         <!-- forecast container -->
         <div class="flex flex-col items-center">
             <!-- forecast card -->
-            <div class="max-w-xs w-80 p-4 bg-gray-50 rounded-2xl shadow-lg mt-6">
+            <div class="max-w-xm w-full p-4 bg-gray-50 rounded-2xl shadow-lg mt-6">
                 <h1 class="text-center text-2xl font-bold text-blue-900 mt-4">Forecast for {{.Weather.Name}}</h1>
                 <div class="flex flex-wrap justify-center mt-6">
                     {{range $index, $element := .Forecast.ListF}}
-                        {{if or (eq $index 5) (eq $index 11) (eq $index 17) (eq $index 23)}}
+                        {{if or (eq $index 5) (eq $index 11) (eq $index 17) (eq $index 23) (eq $index 29) (eq $index 35)}}
                             <div class="forecast-item flex-shrink-0 w-1/6 max-w-xs w-32 p-4 bg-gray-50 rounded-lg shadow-md text-center m-2">
                                 <div class="forecast-temp text-lg font-bold text-blue-900">{{$element.MainF.TempF}}°C</div>
                                 <div class="forecast-icon my-2">
                                     {{range $weather := $element.WeatherF}}
-                                        <img src="http://openweathermap.org/img/wn/{{$weather.IconF}}@2x.png" alt="Weather Icon" class="w-10 h-10 mx-auto">
+                                        <img src="http://openweathermap.org/img/wn/{{$weather.IconF}}@2x.png" alt="Weather Icon" class="w-20 h-20 mx-auto">
                                     {{end}}
                                 </div>
                                 <div class="forecast-desc text-blue-900 text-center font-bold">

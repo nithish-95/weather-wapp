@@ -269,14 +269,15 @@ func formatUnixTime(unixTime int64) string {
 }
 func formatUnixDay(unixTime int64) string {
 	t := time.Unix(unixTime, 0)
-	return t.Format("Monday 02 Jan")
+	return t.Format("02 Jan Monday")
 }
 
 func renderTemplate(w http.ResponseWriter, weather *WeatherResponse, forecast *ForecastResponse, file string) {
 	tmpl := template.New("weather.html").Funcs(template.FuncMap{
 		"formatUnixTime": func(unixTime int64) string {
 			return formatUnixTime(unixTime)
-		}, "formatUnixDay": func(unixTime int64) string {
+		},
+		"formatUnixDay": func(unixTime int64) string {
 			return formatUnixDay(unixTime)
 		},
 	})
@@ -287,11 +288,13 @@ func renderTemplate(w http.ResponseWriter, weather *WeatherResponse, forecast *F
 	}
 
 	data := struct {
-		Weather  *WeatherResponse
-		Forecast *ForecastResponse
+		Weather     *WeatherResponse
+		Forecast    *ForecastResponse
+		CurrentTime int64
 	}{
-		Weather:  weather,
-		Forecast: forecast,
+		Weather:     weather,
+		Forecast:    forecast,
+		CurrentTime: time.Now().Unix(),
 	}
 
 	if err := tmpl.Execute(w, data); err != nil {
