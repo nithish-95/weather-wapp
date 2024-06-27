@@ -1,64 +1,10 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Weather Report</title>
-    <style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #ffffff;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            max-width: 350px;
-            width: 90%;
-            padding: 20px;
-            background-color: #6c8fa151;
-            border-radius: 20px;
-            box-shadow: 10px 20px 30px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            color: #ffffff;
-        }
-    
-        h1, h2, h3 {
-            margin: 10px 0;
-            color: #507aa8;
-        }
-        .icon {
-            margin: 15px 0;
-        }
-        img {
-            max-width: 280px;
-        }
-        
-        form {
-            margin: 20px 0;
-            display:grid;
-            justify-content: center;
-        }
-        input[type="text"] {
-            padding: 10px;
-            margin-right: 10px;
-            border: 1px solid #ccc;
-            border-radius: 20px;
-            flex: 1;
-        }
-        input[type="submit"] {
-            padding: 10px 20px;
-            background-color: #507aa8;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-        }
-        input[type="submit"]:hover {
-            background-color: #7ea6d2;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             if (navigator.geolocation) {
@@ -80,11 +26,88 @@
             }
           });
     </script>
-</head>
-<body>
-    <div class="container">
-        <h1>Weather Report</h1>
-        <p>Fetching weather data...</p>
+  </head>
+  <body class="bg-gray-200 flex items-center justify-center h-screen">
+    <div class="max-w-xm w-72 p-4 bg-gray-50 rounded-2xl shadow-lg">
+      <span class="relative flex h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-600 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-900"></span>
+      </span>
+      <div class="text-center">
+        <p class="text-2xl p-2 font-bold text-blue-900 ">Loding weather data ...</p>
+      </div>
     </div>
+
+
 </body>
 </html>
+
+
+    <!-- forcast card -->
+    <!-- <div class="forecast-container mt-6 w-full max-w-6xl">
+        <h1 class=" text-xl font-bold text-blue-900 mb-4">Forecast for {{.Weather.Name}}</h1>
+        <div class="forecast flex overflow-x-scroll space-x-4 p-2">
+           
+            {{range .Forecast.ListF}}
+            <div class="forecast-item flex-shrink-0 w-1/6 bg-white p-4 rounded-lg shadow-md text-center">
+                <div class="forecast-temp text-lg font-bold text-blue-900">{{.MainF.TempF}}°C</div>
+                <div class="forecast-icon my-2">
+                    {{range .WeatherF}}
+                    <img src="http://openweathermap.org/img/wn/{{.IconF}}@2x.png" alt="Weather Icon" class="w-10 h-10 mx-auto">
+                    {{end}}
+                </div>
+                <div class="forecast-desc text-blue-900 text-center font-bold">
+                    {{range .WeatherF}}
+                    {{.DescriptionF}}
+                    {{end}}
+                </div>
+                <div class="forecast-time text-blue-900 text-center mt-2">
+                    <div class="flex flex-col items-center">
+                    {{formatUnixDay .DtTxtF}}
+                    <span>{{formatUnixTime .DtTxtF}}</span>
+                </div></div>
+            </div>
+            {{end}}
+           
+        </div>
+    </div> -->
+
+    <!-- forcast table -->
+    <!-- <div class="forecast-container mt-6 max-w-6xl bg-white p-4 rounded-2xl shadow-md">
+        <h1 class="text-center text-2xl font-bold text-blue-900 mb-4">Forecast for {{.Weather.Name}}</h1>
+        <div class="overflow-x-auto">
+            <table class="min-w-full table-auto ">
+                <thead class="bg-blue-900 text-white">
+                    <tr>
+                        <th class="px-4 py-2">Date</th>
+                        <th class="px-4 py-2">Temperature</th>
+                        <th class="px-4 py-2">Weather</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $index, $element := .Forecast.ListF}}
+                    {{if lt $index 7}}
+                    <tr class="text-center">
+                        <td class="border px-4 py-2">
+                            <div class="flex flex-col items-center">
+                                {{formatUnixDay .DtTxtF}}
+                                <span>{{formatUnixTime .DtTxtF}}</span>
+                            </div>
+                        </td>
+                        <td class="border px-4 py-2">{{.MainF.TempF}}°C</td>
+                        <td class="border px-4 py-2">
+                            {{range .WeatherF}}
+                            <div class="flex flex-col items-center">
+                                <img src="http://openweathermap.org/img/wn/{{.IconF}}@2x.png" alt="Weather Icon" class="w-10 h-10">
+                                <span>{{.DescriptionF}}</span>
+                            </div>
+                            {{end}}
+                        </td>
+                    </tr>
+                    {{end}}
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div> -->
+    

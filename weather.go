@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -44,6 +45,24 @@ type WeatherResponse struct {
 	} `json:"sys"`
 }
 
+type ForecastResponse struct {
+	ListF []struct {
+		DtTxtF int64 `json:"dt"`
+		MainF  struct {
+			TempF      float64 `json:"temp"`
+			FeelsLikeF float64 `json:"feels_like"`
+			HumidityF  int     `json:"humidity"`
+		} `json:"main"`
+		WeatherF []struct {
+			DescriptionF string `json:"description"`
+			IconF        string `json:"icon"`
+		} `json:"weather"`
+		WindF struct {
+			SpeedF float64 `json:"speed"`
+		} `json:"wind"`
+	} `json:"list"`
+}
+
 type IpResponse struct {
 	City string  `json:"city"`
 	Lat  float64 `json:"lat"`
@@ -51,7 +70,6 @@ type IpResponse struct {
 	Zip  string  `json:"zip"`
 }
 
-// http://ip-api.com/json/{userIp}
 func getIp(ip string) (*IpResponse, error) {
 	url := fmt.Sprintf("http://ip-api.com/json/%s", ip)
 	resp, err := http.Get(url)
@@ -81,7 +99,12 @@ func IpReporter(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not get weather info: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	renderTemplate(w, weather, "weather.html")
+	forcast, err := getForcastByCity(ipInfo.City)
+	if err != nil {
+		http.Error(w, "Could not get weather forcast info: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	renderTemplate(w, weather, forcast, "weather.html")
 }
 
 func getWeatherByZip(zipCode string) (*WeatherResponse, error) {
@@ -98,6 +121,21 @@ func getWeatherByZip(zipCode string) (*WeatherResponse, error) {
 	}
 
 	return &weatherResponse, nil
+}
+func getForcastByZip(zipCode string) (*ForecastResponse, error) {
+	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/forecast?zip=%s&appid=%s&units=metric", zipCode, apiKey)
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var forecastResponse ForecastResponse
+	if err := json.NewDecoder(resp.Body).Decode(&forecastResponse); err != nil {
+		return nil, err
+	}
+
+	return &forecastResponse, nil
 }
 
 func getWeatherByCity(cityName string) (*WeatherResponse, error) {
@@ -116,6 +154,22 @@ func getWeatherByCity(cityName string) (*WeatherResponse, error) {
 	return &weatherResponse, nil
 }
 
+func getForcastByCity(cityName string) (*ForecastResponse, error) {
+	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/forecast?q=%s&appid=%s&units=metric", url.QueryEscape(cityName), apiKey)
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var forecastResponse ForecastResponse
+	if err := json.NewDecoder(resp.Body).Decode(&forecastResponse); err != nil {
+		return nil, err
+	}
+
+	return &forecastResponse, nil
+}
+
 func WeatherReport(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("query")
 
@@ -125,6 +179,7 @@ func WeatherReport(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var weather *WeatherResponse
+	var forcast *ForecastResponse
 	var err error
 
 	if _, convErr := strconv.Atoi(query); convErr == nil {
@@ -138,7 +193,20 @@ func WeatherReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	renderTemplate(w, weather, "weather.html")
+	if _, convErr := strconv.Atoi(query); convErr == nil {
+
+		forcast, err = getForcastByZip(query)
+	} else {
+
+		forcast, err = getForcastByCity(query)
+	}
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	renderTemplate(w, weather, forcast, "weather.html")
 }
 
 func getWeatherByLatLon(lat, lon string) (*WeatherResponse, error) {
@@ -156,6 +224,21 @@ func getWeatherByLatLon(lat, lon string) (*WeatherResponse, error) {
 
 	return &weatherResponse, nil
 }
+func getForcastByLatLon(lat, lon string) (*ForecastResponse, error) {
+	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/forecast?lat=%s&lon=%s&appid=%s&units=metric", lat, lon, apiKey)
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var forecastResponse ForecastResponse
+	if err := json.NewDecoder(resp.Body).Decode(&forecastResponse); err != nil {
+		return nil, err
+	}
+
+	return &forecastResponse, nil
+}
 
 func latlonReporter(w http.ResponseWriter, r *http.Request) {
 	lat := r.URL.Query().Get("lat")
@@ -171,20 +254,51 @@ func latlonReporter(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Could not get weather info: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	renderTemplate(w, weather, "weather.html")
+	forcast, err := getForcastByLatLon(lat, lon)
+	if err != nil {
+		log.Printf("Could not get forecast info: %v", err)
+		http.Error(w, "Could not get forecast info: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	renderTemplate(w, weather, forcast, "weather.html")
 }
 
-func renderTemplate(w http.ResponseWriter, data *WeatherResponse, file string) {
-	tmpl, err := template.ParseFiles(file)
+func formatUnixTime(unixTime int64) string {
+	t := time.Unix(unixTime, 0)
+	return t.Format("3:04 PM")
+}
+func formatUnixDay(unixTime int64) string {
+	t := time.Unix(unixTime, 0)
+	return t.Format("Monday 02 Jan")
+}
+
+func renderTemplate(w http.ResponseWriter, weather *WeatherResponse, forecast *ForecastResponse, file string) {
+	tmpl := template.New("weather.html").Funcs(template.FuncMap{
+		"formatUnixTime": func(unixTime int64) string {
+			return formatUnixTime(unixTime)
+		}, "formatUnixDay": func(unixTime int64) string {
+			return formatUnixDay(unixTime)
+		},
+	})
+	tmpl, err := tmpl.ParseFiles(file)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	data := struct {
+		Weather  *WeatherResponse
+		Forecast *ForecastResponse
+	}{
+		Weather:  weather,
+		Forecast: forecast,
 	}
 
 	if err := tmpl.Execute(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
+
 func indexpage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "index.html")
 }
