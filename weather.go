@@ -7,14 +7,17 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/joho/godotenv"
 )
 
-const apiKey = "f34f18a4c3ca9bd80f6cb96488136858"
+// Declare apiKey as a variable
+var apiKey string
 
 type WeatherResponse struct {
 	Name    string `json:"name"`
@@ -306,6 +309,17 @@ func indexpage(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "index.html")
 }
 func main() {
+	// Load the .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	// Retrieve the API key from the environment
+	apiKey = os.Getenv("OPENAWEATHER_API")
+	if apiKey == "" {
+		log.Fatal("OPENAWEATHER_API is not set in the environment")
+	}
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
@@ -314,7 +328,7 @@ func main() {
 	r.Get("/weather", WeatherReport)
 	r.Get("/weather/latlon", latlonReporter)
 
-	err := http.ListenAndServe(":3000", r)
+	err = http.ListenAndServe(":3000", r)
 	if err != nil {
 		fmt.Print(err)
 	}
