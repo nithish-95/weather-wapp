@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100" rel="stylesheet">
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+        }
+        .weather-card {
+            background: linear-gradient(145deg, #f0f4ff 0%, #ffffff 100%);
+        }
+        .forecast-card {
+            transition: transform 0.2s ease-in-out;
+        }
+        .forecast-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Information Banner -->
+    <div class="bg-blue-50 border-l-4 border-blue-900 p-4 mb-8">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center">
+                <span class="material-symbols-outlined text-blue-900 mr-2">info</span>
+                <p class="text-blue-900 text-sm md:text-base">
+                    <span class="font-semibold">Note:</span> Zipcodes are US-only. Use city names for international locations.
+                </p>
+            </div>
+            <!-- Temperature Unit Toggle -->
+            <div class="flex items-center gap-2">
+                <span class="text-blue-900 font-medium">°C</span>
+                <label class="relative inline-block h-7 w-12 cursor-pointer">
+                    <input type="checkbox" id="tempUnit" class="peer sr-only">
+                    <span class="absolute inset-0 rounded-full bg-blue-900 transition-colors duration-300 peer-checked:bg-blue-600"></span>
+                    <span class="absolute inset-y-0 start-0 m-1 h-5 w-5 rounded-full bg-white transition-all duration-300 peer-checked:start-5"></span>
+                </label>
+                <span class="text-blue-900 font-medium">°F</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="max-w-7xl mx-auto px-4 mb-12">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <a href="/" class="bg-blue-900 hover:bg-blue-800 text-white px-6 py-3 rounded-full shadow-md transition-colors duration-200 flex items-center">
+                <span class="material-symbols-outlined mr-2">home</span>
+                Home
+            </a>
+            
+            <form action="/weather" method="get" class="w-full md:max-w-xl">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        name="query" 
+                        placeholder="Enter city or ZIP code" 
+                        class="w-full py-4 pl-6 pr-32 rounded-full border-0 focus:ring-4 focus:ring-blue-200 focus:ring-opacity-50 shadow-lg"
+                        required
+                    >
+                    <button 
+                        type="submit" 
+                        class="absolute right-2 top-2 bg-blue-900 hover:bg-blue-800 text-white px-8 py-2 rounded-full shadow-md transition-colors duration-200 flex items-center"
+                    >
+                        <span class="material-symbols-outlined mr-2">search</span>
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 pb-12">
+        <!-- Current Weather -->
+        <div class="weather-card rounded-3xl shadow-xl p-8 mb-12">
+            <div class="text-center space-y-6">
+                <h2 class="text-2xl font-bold text-blue-900">Current Weather in</h2>
+                <h1 class="text-5xl font-black text-blue-900 mb-4">{{.Weather.Name}}</h1>
+                
+                <div class="flex flex-col items-center">
+                    <img 
+                        src="http://openweathermap.org/img/wn/{{(index .Weather.Weather 0).Icon}}@4x.png" 
+                        alt="Weather icon" 
+                        class="w-40 h-40 -my-4"
+                    >
+                    <p class="text-6xl font-bold text-blue-900 mb-2" data-temp="{{.Weather.Main.Temp}}">{{.Weather.Main.Temp}}°C</p>
+                    <p class="text-2xl font-semibold text-blue-900 capitalize">{{(index .Weather.Weather 0).Description}}</p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+                    <div class="bg-white p-4 rounded-xl text-center">
+                        <p class="text-sm text-blue-600 mb-1">Min Temp</p>
+                        <p class="text-2xl font-bold text-blue-900" data-temp="{{.Weather.Main.TempMin}}">{{.Weather.Main.TempMin}}°C</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl text-center">
+                        <p class="text-sm text-blue-600 mb-1">Max Temp</p>
+                        <p class="text-2xl font-bold text-blue-900" data-temp="{{.Weather.Main.TempMax}}">{{.Weather.Main.TempMax}}°C</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl text-center">
+                        <p class="text-sm text-blue-600 mb-1">Wind</p>
+                        <p class="text-2xl font-bold text-blue-900">{{.Weather.Wind.Speed}} m/s</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl text-center">
+                        <p class="text-sm text-blue-600 mb-1">Humidity</p>
+                        <p class="text-2xl font-bold text-blue-900">{{.Weather.Main.Humidity}}%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Forecast -->
+        <div class="bg-white rounded-3xl shadow-xl p-8">
+            <h2 class="text-3xl font-bold text-blue-900 mb-8 text-center">5-Day Forecast</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {{range $index, $element := .Forecast.List}}
+                    {{if or (eq $index 5) (eq $index 11) (eq $index 17) (eq $index 23) (eq $index 29) (eq $index 35)}}
+                        <div class="forecast-card bg-gray-50 p-6 rounded-xl hover:shadow-lg transition-all duration-200">
+                            <div class="flex flex-col items-center space-y-4">
+                                <p class="text-xl font-semibold text-blue-900">
+                                    {{formatUnixDay $element.Dt}}
+                                </p>
+                                <p class="text-blue-600">{{formatUnixTime $element.Dt}}</p>
+                                
+                                <img 
+                                    src="http://openweathermap.org/img/wn/{{(index $element.Weather 0).Icon}}@2x.png" 
+                                    alt="Weather icon" 
+                                    class="w-20 h-20"
+                                >
+                                
+                                <div class="text-center">
+                                    <p class="text-3xl font-bold text-blue-900 mb-1" data-temp="{{$element.Main.Temp}}">{{$element.Main.Temp}}°C</p>
+                                    <p class="text-lg text-blue-900 capitalize">
+                                        {{(index $element.Weather 0).Description}}
+                                    </p>
+                                </div>
+                                
+                                <div class="w-full grid grid-cols-2 gap-4 mt-4">
+                                    <div class="text-center">
+                                        <p class="text-sm text-blue-600">Feels Like</p>
+                                        <p class="font-semibold text-blue-900" data-temp="{{$element.Main.FeelsLike}}">{{$element.Main.FeelsLike}}°C</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-sm text-blue-600">Wind</p>
+                                        <p class="font-semibold text-blue-900">{{$element.Wind.Speed}} m/s</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {{end}}
+                {{end}}
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Temperature conversion functions
+        function celsiusToFahrenheit(celsius) {
+            return (celsius * 9/5) + 32;
+        }
+
+        function fahrenheitToCelsius(fahrenheit) {
+            return (fahrenheit - 32) * 5/9;
+        }
+
+        // Update all temperature displays
+        function updateTemperatures(toFahrenheit) {
+            const tempElements = document.querySelectorAll('[data-temp]');
+            tempElements.forEach(el => {
+                const celsius = parseFloat(el.dataset.temp);
+                if (toFahrenheit) {
+                    el.textContent = `${celsiusToFahrenheit(celsius).toFixed(1)}°F`;
+                } else {
+                    el.textContent = `${celsius.toFixed(1)}°C`;
+                }
+            });
+        }
+
+        // Initialize temperature display
+        document.addEventListener('DOMContentLoaded', function() {
+            // Store original Celsius values
+            document.querySelectorAll('[data-temp]').forEach(el => {
+                const text = el.textContent;
+                if (text.includes('°C')) {
+                    const temp = parseFloat(text);
+                    if (!isNaN(temp)) {
+                        el.setAttribute('data-temp', temp);
+                    }
+                }
+            });
+
+            // Get user preference from localStorage
+            const prefersFahrenheit = localStorage.getItem('prefersFahrenheit') === 'true';
+            const tempUnit = document.getElementById('tempUnit');
+
+            if (prefersFahrenheit) {
+                tempUnit.checked = true;
+                updateTemperatures(true);
+            }
+
+            // Handle temperature unit toggle
+            tempUnit.addEventListener('change', function() {
+                localStorage.setItem('prefersFahrenheit', this.checked);
+                updateTemperatures(this.checked);
+            });
+        });
+    </script>
+</body>
+</html>
