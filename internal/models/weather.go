@@ -10,8 +10,14 @@ type WeatherResponse struct {
 	Main struct {
 		Temp      float64 `json:"temp"`
 		FeelsLike float64 `json:"feels_like"`
+		TempMin   float64 `json:"temp_min"`
+		TempMax   float64 `json:"temp_max"`
 		Humidity  int     `json:"humidity"`
 	} `json:"main"`
+	Wind struct {
+		Speed float64 `json:"speed"`
+		Deg   float64 `json:"deg"`
+	} `json:"wind"`
 	Sys struct {
 		Country string `json:"country"`
 		Sunrise int64  `json:"sunrise"`
