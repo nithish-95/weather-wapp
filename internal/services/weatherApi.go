@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	io "io"
 	"net/http"
 	"net/url"
 
@@ -38,7 +39,8 @@ func (ws *WeatherService) GetWeatherByCity(city string) (*models.WeatherResponse
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("weather API returned status: %d", resp.StatusCode)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("weather API returned status: %d, body: %s", resp.StatusCode, string(bodyBytes))
 	}
 
 	var weather models.WeatherResponse
@@ -64,7 +66,8 @@ func (ws *WeatherService) GetForecastByCity(city string) (*models.ForecastRespon
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("forecast API returned status: %d", resp.StatusCode)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("forecast API returned status: %d, body: %s", resp.StatusCode, string(bodyBytes))
 	}
 
 	var forecast models.ForecastResponse
@@ -90,7 +93,8 @@ func (ws *WeatherService) GetWeatherByZip(zip string) (*models.WeatherResponse, 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("weather API returned status: %d", resp.StatusCode)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("weather API returned status: %d, body: %s", resp.StatusCode, string(bodyBytes))
 	}
 
 	var weather models.WeatherResponse
@@ -116,7 +120,8 @@ func (ws *WeatherService) GetForecastByZip(zip string) (*models.ForecastResponse
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("forecast API returned status: %d", resp.StatusCode)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("forecast API returned status: %d, body: %s", resp.StatusCode, string(bodyBytes))
 	}
 
 	var forecast models.ForecastResponse
@@ -142,7 +147,8 @@ func (ws *WeatherService) GetWeatherByLatLon(lat, lon string) (*models.WeatherRe
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("weather API returned status: %d", resp.StatusCode)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("weather API returned status: %d, body: %s", resp.StatusCode, string(bodyBytes))
 	}
 
 	var weather models.WeatherResponse
@@ -168,7 +174,8 @@ func (ws *WeatherService) GetForecastByLatLon(lat, lon string) (*models.Forecast
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("forecast API returned status: %d", resp.StatusCode)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("forecast API returned status: %d, body: %s", resp.StatusCode, string(bodyBytes))
 	}
 
 	var forecast models.ForecastResponse
