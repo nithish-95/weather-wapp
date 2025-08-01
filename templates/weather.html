@@ -9,6 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 </head>
 
 <body class="relative">
@@ -79,7 +81,7 @@
             </div>
             <div class="flex items-end justify-center md:justify-start gap-4">
               <div class="weather-icon floating">
-                <img src="http://openweathermap.org/img/wn/{{(index .Weather.Weather 0).Icon}}@4x.png"
+                <img src="https://openweathermap.org/img/wn/{{(index .Weather.Weather 0).Icon}}@4x.png"
                   alt="Weather Icon" class="w-32 h-32">
               </div>
               <div>
@@ -182,7 +184,7 @@
           {{if lt $index 8}}
           <div class="flex-shrink-0 glass-card p-4 rounded-xl text-center min-w-[100px]">
             <p class="font-medium">{{formatUnixTime $element.Dt}}</p>
-            <img src="http://openweathermap.org/img/wn/{{(index $element.Weather 0).Icon}}@2x.png"
+            <img src="https://openweathermap.org/img/wn/{{(index $element.Weather 0).Icon}}@2x.png"
               alt="Weather Icon" class="w-16 h-16 mx-auto">
             <p class="text-xl font-bold mt-2">{{$element.Main.Temp}}°</p>
           </div>
@@ -204,7 +206,7 @@
           <div class="glass-card p-4 rounded-xl text-center">
             <p class="font-bold">{{formatUnixDay $element.Dt}}</p>
             <p class="text-sm text-blue-300">{{formatUnixDate $element.Dt}}</p>
-            <img src="http://openweathermap.org/img/wn/{{(index $element.Weather 0).Icon}}@2x.png"
+            <img src="https://openweathermap.org/img/wn/{{(index $element.Weather 0).Icon}}@2x.png"
               alt="Weather Icon" class="w-20 h-20 mx-auto my-2">
             <p class="text-2xl font-bold">{{$element.Main.Temp}}°</p>
             <p class="text-blue-300">{{(index $element.Weather 0).Description}}</p>
