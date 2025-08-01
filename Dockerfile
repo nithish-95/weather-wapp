@@ -25,6 +25,7 @@ WORKDIR /app
 # Copy binary and required files
 COPY --from=builder /app/bin/weatherapp .
 COPY --from=builder /app/templates ./templates
+COPY --from=builder /app/static ./static
 
 # Set permissions
 RUN chown -R appuser:appgroup /app
