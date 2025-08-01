@@ -142,6 +142,10 @@ func main() {
 	r.Get("/weather", handler.WeatherReport)
 	r.Get("/weather/latlon", handler.LatLonReport)
 
+	// Serve static files
+	fileServer := http.FileServer(http.Dir("./static"))
+	r.Handle("/static/*", http.StripPrefix("/static", fileServer))
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "3000"
